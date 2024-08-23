@@ -1,42 +1,62 @@
-import React, { useReducer, useContext, createContext } from 'react';
+import React, { useReducer, useContext, createContext, useEffect } from 'react';
 
 const StateContext = createContext();
 const DispatchContext = createContext();
 
-const snoozeTask = function () {
-  this.dueDate.setDate(this.dueDate.getDate() + 1);
-};
+function snoozeTask(task) {
+  const newDueDate = new Date(task.dueDate);
+  newDueDate.setDate(newDueDate.getDate() + 1);
+  task.dueDate = newDueDate.toISOString().split('T')[0]; // Format to 'YYYY-MM-DD'
+}
 
-const initialTaskState = [
+
+const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
   {
     id: 1,
     title: "Complete Project Proposal",
     description: "Draft and submit the project proposal document.",
-    dueDate: new Date(2024, 8, 23), // September 23, 2024
+    createdOn: '2024-09-22', // Current date in 'YYYY-MM-DD'
+    dueDate: '2024-09-23',
+    dueTime: '09:00 PM',
     priority: 1,
     completed: false,
-    snooze: snoozeTask
+    snooze: function() { snoozeTask(this); }
   },
   {
     id: 2,
     title: "Review Team Feedback",
     description: "Go through the feedback provided by the team.",
-    dueDate: new Date(2024, 8, 25), // September 25, 2024
+    createdOn: '2024-09-22',
+    dueDate: '2024-09-25',
+    dueTime: '10:00:00',
     priority: 2,
     completed: false,
-    snooze: snoozeTask
+    snooze: function() { snoozeTask(this); }
   },
   {
     id: 3,
     title: "Submit Timesheet",
     description: "Submit the timesheet for this week.",
-    dueDate: new Date(2024, 8, 28), // September 28, 2024
+    createdOn: '2024-09-22',
+    dueDate: '2024-09-28',
+    dueTime: '11:00:00',
     priority: 3,
     completed: false,
-    snooze: snoozeTask
+    snooze: function() { snoozeTask(this); }
+  },
+  {
+    id: 4,
+    title: "Submit Timesheet2",
+    description: "Submit the timesheet for this week.",
+    createdOn: '2024-09-22',
+    dueDate: '2024-09-28',
+    dueTime: '12:00:00',
+    priority: 3,
+    completed: true,
+    snooze: function() { snoozeTask(this); }
   }
-]
-  ;
+];
+
 
 function reducer(state, action) {
   switch (action.type) {
@@ -83,6 +103,10 @@ function reducer(state, action) {
 export function TaskStateProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialTaskState);
 
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(state));
+  }, [state]);
+  
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>
