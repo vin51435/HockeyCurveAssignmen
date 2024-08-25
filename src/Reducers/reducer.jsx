@@ -9,6 +9,7 @@ function snoozeTask(task) {
   task.dueDate = newDueDate.toISOString().split('T')[0]; // Format to 'YYYY-MM-DD'
 }
 
+const generateUniqueId = () => Date.now();
 
 const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
   {
@@ -20,7 +21,7 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueTime: '09:00 PM',
     priority: 1,
     completed: false,
-    snooze: function() { snoozeTask(this); }
+    snooze: function () { snoozeTask(this); }
   },
   {
     id: 2,
@@ -31,7 +32,7 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueTime: '10:00:00',
     priority: 2,
     completed: false,
-    snooze: function() { snoozeTask(this); }
+    snooze: function () { snoozeTask(this); }
   },
   {
     id: 3,
@@ -42,7 +43,7 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueTime: '11:00:00',
     priority: 3,
     completed: false,
-    snooze: function() { snoozeTask(this); }
+    snooze: function () { snoozeTask(this); }
   },
   {
     id: 4,
@@ -53,7 +54,7 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueTime: '12:00:00',
     priority: 3,
     completed: true,
-    snooze: function() { snoozeTask(this); }
+    snooze: function () { snoozeTask(this); }
   }
 ];
 
@@ -64,17 +65,11 @@ function reducer(state, action) {
       console.log(state);
       return state;
     case 'update': {
-      const updatedState = [...state];
-      const taskIndex = updatedState.findIndex(task => task.id === action.payload?.id);
-
-      if (taskIndex === -1) {
-        throw new Error('Task not found'); // Error handling if task is not found
-      }
-
-      updatedState[taskIndex] = {
-        ...updatedState[taskIndex],
-        [action.payload?.name]: action.payload?.value
-      };
+      const updatedState = state.map(task =>
+        task.id === action.payload.id
+          ? { ...task, ...action.payload } // Replace the entire task object
+          : task
+      );
 
       return updatedState;
     }
@@ -83,7 +78,7 @@ function reducer(state, action) {
     }
     case 'add': {
       const newTask = {
-        id: action.payload?.id,
+        id: generateUniqueId(),
         title: action.payload?.title,
         description: action.payload?.description,
         dueDate: new Date(action.payload?.dueDate),
@@ -106,7 +101,7 @@ export function TaskStateProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(state));
   }, [state]);
-  
+
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>

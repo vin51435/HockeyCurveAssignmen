@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import {  useAppState } from '../Reducers/reducer';
 import TaskViewAccordion from '../Components/TaskViewAccordion';
+import { Link } from 'react-router-dom';
+import { useAppState } from '../reducers/reducer';
 
 const TaskPage = () => {
   const [tab, setTab] = useState(0);
@@ -33,9 +34,9 @@ const TaskPage = () => {
     <div className='flex flex-col justify-center items-center'>
       <div className='w-2/4'>
       <div>
-        <button>
+        <Link to='/addtask'>
           Add New Task
-        </button>
+        </Link>
       </div>
         {tabs.map((ele) => (
           <span
