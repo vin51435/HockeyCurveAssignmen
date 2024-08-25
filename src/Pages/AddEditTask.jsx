@@ -26,7 +26,7 @@ const AddTask = ({ type }) => {
         </Link>
         <div className='block p-4 rounded-md bg-zinc-100'>
           <div className='pb-4 flex justify-between items-center text-xl'>
-            <span className='font-semibold'>Add New Task</span>
+            <span className='font-semibold'>{type === 'add' ? 'Add New Task' : 'Edit Task'}</span>
             <span className='flex px-8 py-1 h-full bg-rose-600 text-sm font-medium text-white rounded-3xl'>Delete</span>
           </div>
           <form className='flex flex-col gap-2'>
@@ -90,10 +90,16 @@ const AddTask = ({ type }) => {
                 <span>Low</span>
                 <span className='w-3 h-3 rounded-full bg-blue-900'></span></div>
             </div>
-            <div className='flex justify-between items-center gap-4 py-9'>
+            {type === 'add' ? <div className='flex justify-between items-center gap-4 py-9'>
               <span className='flex flex-1 items-center justify-center px-8 py-1 h-full bg-emerald-800 text-sm font-medium text-white rounded-3xl'>Add Task</span>
               <span className='flex flex-1 items-center justify-center px-8 py-1 h-full bg-emerald-800 text-sm font-medium text-white rounded-3xl'>Cacel</span>
-            </div>
+            </div> :
+              <div className="grid grid-cols-2 gap-4 py-3">
+                <button className="col-span-1 py-1 h-full bg-emerald-800 text-sm font-medium text-white rounded-3xl">Save Changes</button>
+                <button className="col-span-1 py-1 h-full bg-emerald-800 text-sm font-medium text-white rounded-3xl">Mark as done</button>
+
+                <button className="col-span-2 mx-auto px-8 py-1 h-full bg-emerald-800 text-sm font-medium text-white rounded-3xl">Cancel</button>
+              </div>}
           </form>
         </div>
       </div>
