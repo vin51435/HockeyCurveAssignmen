@@ -16,9 +16,8 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     id: 1,
     title: "Complete Project Proposal",
     description: "Draft and submit the project proposal document.",
-    createdOn: '2024-09-22', // Current date in 'YYYY-MM-DD'
-    dueDate: '2024-09-23',
-    dueTime: '09:00 PM',
+    createdOn: '2024-09-22', // Current date innew Date()'
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 1,
     completed: false,
     snooze: function () { snoozeTask(this); }
@@ -27,9 +26,8 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     id: 2,
     title: "Review Team Feedback",
     description: "Go through the feedback provided by the team.",
-    createdOn: '2024-09-22',
-    dueDate: '2024-09-25',
-    dueTime: '10:00:00',
+    createdOn: new Date(),
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 2,
     completed: false,
     snooze: function () { snoozeTask(this); }
@@ -38,9 +36,8 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     id: 3,
     title: "Submit Timesheet",
     description: "Submit the timesheet for this week.",
-    createdOn: '2024-09-22',
-    dueDate: '2024-09-28',
-    dueTime: '11:00:00',
+    createdOn: new Date(),
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 3,
     completed: false,
     snooze: function () { snoozeTask(this); }
@@ -49,9 +46,8 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     id: 4,
     title: "Submit Timesheet2",
     description: "Submit the timesheet for this week.",
-    createdOn: '2024-09-22',
-    dueDate: '2024-09-28',
-    dueTime: '12:00:00',
+    createdOn: new Date(),
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 3,
     completed: true,
     snooze: function () { snoozeTask(this); }
@@ -64,26 +60,41 @@ function reducer(state, action) {
     case 'display':
       console.log(state);
       return state;
+    case 'complete': {
+      const updatedState = state.map(task =>
+        task.id === action.payload.id ? { ...task, completed: true } : task
+      );
+      return updatedState;
+    }
     case 'update': {
       const updatedState = state.map(task =>
         task.id === action.payload.id
           ? { ...task, ...action.payload } // Replace the entire task object
           : task
       );
-
+      return updatedState;
+    }
+    case 'snooze': {
+      const updatedState = state.map(task =>
+        task.id === action.payload.id
+          ? { ...task, dueDate: new Date(new Date(task.dueDate).getTime() + 24 * 60 * 60 * 1000).toISOString() }
+          : task
+      );
       return updatedState;
     }
     case 'delete': {
       return state.filter(task => task.id !== action.payload?.id);
     }
     case 'add': {
+      console.log(action.payload);
       const newTask = {
         id: generateUniqueId(),
         title: action.payload?.title,
         description: action.payload?.description,
         dueDate: new Date(action.payload?.dueDate),
-        priority: action.payload?.priority,
-        completed: action.payload?.completed,
+        priority: action.payload?.priority && 3,
+        createdOn: new Date(),
+        completed: false,
         snooze: snoozeTask // Assuming `snoozeTask` is defined elsewhere
       };
 

@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppDispatch } from '../Reducers/reducer';
+import { Link } from 'react-router-dom';
 
 const TaskViewAccordion = ({ props }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(0);
   const accordionRef = useRef(null);
   const dispatch = useAppDispatch();
-
-  const toggleOpen = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (accordionRef.current && !accordionRef.current.contains(event.target)) {
-        setIsOpen(false);
+        setIsOpen(0);
       }
     };
 
@@ -21,44 +20,93 @@ const TaskViewAccordion = ({ props }) => {
     };
   }, []);
 
+  function formatDateTime(dateString, showTime = true) {
+    const date = new Date(dateString);
+
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+
+    let formattedDate = `${day} ${month} ${year}`;
+
+    if (showTime) {
+      const timeOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      };
+      const time = date.toLocaleTimeString('en-US', timeOptions);
+      formattedDate += ` - ${time}`;
+    }
+
+    return formattedDate;
+  }
+
   return (
-    <div className="border-b" ref={accordionRef}>
-      <button
-        className="flex items-start justify-between py-5 w-full h-full border-b border-gray-200 dark:border-gray-700 dark:text-gray-400"
-        onClick={toggleOpen}
+    <div className="bg-zinc-300 mb-3"
+      data-accordionid={props.id}
+      ref={accordionRef}
+    >
+      <div
+        className="flex items-start justify-between py-2 px-3 w-full h-full cursor-pointer dark:border-gray-700 dark:text-gray-400"
+        onClick={() => setIsOpen(prev => {
+          if (prev === props.id) {
+            return 0;
+          } else {
+            return props.id;
+          };
+        })}
       >
         <div className=' flex items-start justify-start w-full font-medium rtl:text-right text-gray-500'>
-          <span className='mt-2'>
+          <span className='mt-2 text-emerald-800'>
             <svg className={`w-3 h-3 transition-all ${isOpen ? '' : '-rotate-90'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 490">
-              <path d="M245 456.701 490 33.299H0z" />
+              <path d="M245 456.701 490 33.299H0z" fill='currentColor' />
             </svg>
           </span>
-          <div className='pl-2 flex flex-col justify-start items-start w-full'>
+          <div className='pl-2 flex flex-col justify-center items-start w-full'>
             <div className='flex justify-between items-center h-full w-full'>
-              <span>{props?.title}</span>
+              <span className='text-black'>{props?.title}</span>
               <div className='flex items-center gap-2'>
-                <span className=''>{props.priority === 1 ? 'High' : props.priority === 2 ? 'Medium' : 'Low'}</span>
-                <span className='w-3 h-3 rounded-full bg-orange-900'></span>
+                <span className='text-black'>{props.priority === 1 ? 'High' : props.priority === 2 ? 'Medium' : 'Low'}</span>
+                <span className={`w-3 h-3 rounded-full ${props.priority === 1 ? 'bg-orange-900' : props.priority === 2 ? 'bg-orange-500' : 'bg-blue-900'}`}></span>
               </div>
             </div>
-            <span className='text-sm'>Created: {props.createdOn}</span>
+            <span className='text-xs text-black'>Due Date: {formatDateTime(props?.dueDate, false)}</span>
           </div>
         </div>
-      </button>
-      <div className={`overflow-hidden transition-max-height duration-300 ease-in-out ${isOpen ? 'max-h-40' : 'max-h-0'}`}>
-        <div className="p-4 border-t bg-gray-50">
-          <p>
-            Description:
+      </div>
+      <div className={`overflow-hidden transition-max-height duration-300 ease-in-out ${isOpen === props.id ? 'h-full' : 'max-h-0'}`}>
+        <div className="pt-4  px-8 border-t bg-zinc-100">
+          <p className='leading-5'>
+            <span className='text-emerald-900 font-bold'> Description:</span>
             <br />
-            {props?.description}
+            <span className='font-medium'>{props?.description}</span>
             <br />
-            Due Date:
+            <span className='text-emerald-900 font-bold'> Created:</span>
             <br />
-            {props?.dueDate} - {props?.dueTime}
+            <span className='font-medium'>{formatDateTime(props.createdOn, true)}</span>
+            <br />
           </p>
-          <div>
-            <button>Edit</button>
-            <button onClick={() => dispatch({ type: 'delete', payload: { id: props?.id } })}>Delete</button>
+          <div className='flex justify-between items-center gap-2 h-full w-full mt-4'>
+            {!props?.completed &&
+              <>
+                <Link
+                  className='flex-1 py-1 h-full text-center cursor-pointer bg-emerald-900 text-base text-white rounded-3xl'
+                  to={`/task?id=${props.id}`} >
+                  Edit
+                </Link>
+                <span
+                  className='flex-1 py-1 h-full text-center cursor-pointer bg-emerald-900 text-base text-white rounded-3xl'
+                  onClick={() => dispatch({ type: 'snooze', payload: { id: props?.id } })}>
+                  Snooze
+                </span>
+              </>
+            }
+            <span
+              className='flex-1 py-1 h-full text-center cursor-pointer bg-emerald-900 text-base text-white rounded-3xl'
+              onClick={() => dispatch({ type: 'delete', payload: { id: props?.id } })}>
+              Delete
+            </span>
           </div>
         </div>
       </div>
