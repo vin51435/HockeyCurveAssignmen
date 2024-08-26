@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAppState } from '../Reducers/reducer';
 import { ImPlus } from 'react-icons/im';
 import { FaRegFolderOpen } from 'react-icons/fa';
+import DarkModeToggle from '../Components/DarkModeButton';
 
 const TaskPage = () => {
   const [tab, setTab] = useState(0);
@@ -35,15 +36,16 @@ const TaskPage = () => {
   return (
     <div className='flex flex-col justify-center items-center p-5'>
       <div className='w-full sm:w-2/4'>
+      <div className='flex justify-end w-full'><DarkModeToggle /></div>
         <div>
-          <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 w-fit ml-2 rounded-t-lg'>
+          <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit ml-2 rounded-t-lg'>
             <span className='text-xl font-semibold'><FaRegFolderOpen /></span>
             <span className='pl-2 font-medium'>Task List View</span>
           </span>
         </div>
         <div className='relative '>
-          <div className='px-4 pt-4 bg-zinc-300 rounded-t-xl'>
-            <Link to={'/task'} className='flex justify-center items-center mb-4 px-2 py-1 text-sm text-white bg-emerald-800 w-fit rounded-3xl'>
+          <div className='px-4 pt-4 bg-zinc-300 rounded-t-xl dark:bg-zinc-700'>
+            <Link to={'/task'} className='flex justify-center items-center mb-4 px-2 py-1 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
               <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><ImPlus /></span>
               <span className='pl-2 text-xs font-medium'>Add New Task</span>
             </Link>
@@ -52,16 +54,16 @@ const TaskPage = () => {
                 <span
                   key={ele.index}
                   onClick={() => setTab(ele.index)}
-                  className={`cursor-pointer flex-1 font-medium text-center text-sm rounded-t-lg px-1 py-2 ${tab === ele.index ? 'text-black bg-zinc-100' : 'text-white bg-emerald-800'}`}
+                  className={`cursor-pointer flex-1 font-medium text-center text-sm rounded-t-lg px-1 py-2 dark:text-white ${tab === ele.index ? 'text-black bg-zinc-100 dark:bg-zinc-900' : 'text-white bg-emerald-800 dark:bg-emerald-700'}`}
                 >
                   {ele.name}
                 </span>
               ))}
             </div>
           </div>
-          <span className='block absolute left-0 w-full h-5 bg-zinc-100' />
+          <span className='block absolute left-0 w-full h-5 bg-zinc-100 dark:bg-zinc-900' />
           <div className='mt-4'>
-            <div className='bg-zinc-100'>
+            <div className=' pb-1 bg-zinc-100 dark:bg-zinc-900 rounded-b-xl'>
               {filteredTasks.map((ele) => (
                 <TaskViewAccordion key={ele.id} props={ele} />
               ))}

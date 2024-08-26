@@ -8,11 +8,11 @@ const RouteEle = () => {
   return (
     <Router>
       <Routes>
-        {/* <Route element={<WebsiteLayout />}>
-      </Route> */}
-        <Route path="/" element={<TaskView />} />
-        <Route path="/task" element={<AddEditTask />} />
-        <Route path="/test" element={<Test />} />
+        {/* <Route element={<Layout />}> */}
+          <Route path="/" element={<TaskView />} />
+          <Route path="/task" element={<AddEditTask />} />
+          <Route path="/test" element={<Test />} />
+        {/* </Route> */}
       </Routes>
     </Router>
   );
