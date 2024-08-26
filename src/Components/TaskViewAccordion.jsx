@@ -71,7 +71,16 @@ const TaskViewAccordion = ({ props }) => {
                 <span className={`w-3 h-3 rounded-full ${props.priority === 1 ? 'bg-orange-900' : props.priority === 2 ? 'bg-orange-500' : 'bg-blue-900'}`}></span>
               </div>
             </div>
-            <span className='text-xs text-black dark:text-white'>Due Date: {formatDateTime(props?.dueDate, true)}</span>
+            {props?.completed
+              ?
+              <span className='text-xs text-emerald-800 dark:text-emerald-300'>Completed</span>
+              :
+              (new Date(props?.dueDate) < (new Date()))
+                ?
+                <span className='text-xs text-red-700 dark:text-red-500'>Overdue: {formatDateTime(props?.dueDate, true)}</span>
+                :
+                <span className='text-xs text-black dark:text-white'>Due Date: {formatDateTime(props?.dueDate, true)}</span>
+            }
           </div>
         </div>
       </div>

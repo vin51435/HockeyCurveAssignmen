@@ -68,7 +68,7 @@ const AddTask = () => {
       <div className='w-full sm:w-2/4'>
         <div className='flex justify-end w-full'><DarkModeToggle /></div>
         <div>
-          <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit ml-2 rounded-t-lg'>
+          <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit ml-3 rounded-t-lg'>
             <span className='text-xl font-semibold'><FaRegFolderOpen /></span>
             <span className='pl-2 font-medium'>Task List View</span>
           </span>

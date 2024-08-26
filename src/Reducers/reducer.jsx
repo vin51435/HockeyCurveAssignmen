@@ -51,6 +51,16 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     priority: 3,
     completed: true,
     snooze: function () { snoozeTask(this); }
+  },
+  {
+    id: 5,
+    title: "Over Due",
+    description: "Submit the timesheet for last week.",
+    createdOn: new Date(),
+    dueDate: new Date(new Date().setDate(new Date().getDate() - 1)),
+    priority: 1,
+    completed: false,
+    snooze: function () { snoozeTask(this); }
   }
 ];
 

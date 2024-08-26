@@ -5,25 +5,38 @@ import { useAppState } from '../Reducers/reducer';
 import { ImPlus } from 'react-icons/im';
 import { FaRegFolderOpen } from 'react-icons/fa';
 import DarkModeToggle from '../Components/DarkModeButton';
+import { FixedSizeList as List } from 'react-window';
 
 const TaskPage = () => {
   const [tab, setTab] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
   const state = useAppState();
 
   const filteredTasks = useMemo(() => {
+    let tasks = state;
     switch (tab) {
       case 1:
-        return state.filter(task => task.priority === 1); // High priority
+        tasks = tasks.filter(task => task.priority === 1);
+        break;
       case 2:
-        return state.filter(task => task.priority === 2); // Medium priority
+        tasks = tasks.filter(task => task.priority === 2);
+        break;
       case 3:
-        return state.filter(task => task.priority === 3); // Low priority
+        tasks = tasks.filter(task => task.priority === 3);
+        break;
       case 4:
-        return state.filter(task => task.completed); // Completed tasks
+        tasks = tasks.filter(task => task.completed);
+        break;
       default:
-        return state; // All tasks
+        break;
     }
-  }, [tab, state]);
+
+    if (searchTerm) {
+      tasks = tasks.filter(task => task?.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+
+    return tasks;
+  }, [tab, searchTerm, state]);
 
   const tabs = [
     { name: 'All', index: 0 },
@@ -33,12 +46,21 @@ const TaskPage = () => {
     { name: 'Done', index: 4 }
   ];
 
+  const TaskItem = ({ index }) => {
+    const task = filteredTasks[index];
+    return (
+      <div className=' pb-1 bg-zinc-100 dark:bg-zinc-900'>
+        <TaskViewAccordion key={task.id} props={task} />
+      </div>
+    );
+  };
+
   return (
     <div className='flex flex-col justify-center items-center p-5'>
       <div className='w-full sm:w-2/4'>
-      <div className='flex justify-end w-full'><DarkModeToggle /></div>
+        <div className='flex justify-end w-full'><DarkModeToggle /></div>
         <div>
-          <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit ml-2 rounded-t-lg'>
+          <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit ml-3 rounded-t-lg'>
             <span className='text-xl font-semibold'><FaRegFolderOpen /></span>
             <span className='pl-2 font-medium'>Task List View</span>
           </span>
@@ -62,12 +84,23 @@ const TaskPage = () => {
             </div>
           </div>
           <span className='block absolute left-0 w-full h-5 bg-zinc-100 dark:bg-zinc-900' />
-          <div className='mt-4'>
-            <div className=' pb-1 bg-zinc-100 dark:bg-zinc-900 rounded-b-xl'>
-              {filteredTasks.map((ele) => (
-                <TaskViewAccordion key={ele.id} props={ele} />
-              ))}
-            </div>
+          <div className='none px-3 mt-5 pb-4 relative bg-zinc-100 dark:bg-zinc-900'>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full dark:bg-gray-900 dark:text-white dark:shadow-[inset_0_0_4px_0_rgba(255,255,255,0.2)] dark:shadow-gray-700 px-3 py-2 w-full font-medium text-black shadow-[inset_0_0_4px_0_rgba(0,0,0,0.5)] shadow-gray-400 focus:outline-none focus-visible:none"
+            />
+          </div>
+          <div className='rounded-b-xl bg-zinc-100 dark:bg-zinc-900'>
+            <List
+              height={600}  // Adjust based on your layout
+              itemCount={filteredTasks.length}
+              itemSize={100}  // Adjust based on your item height
+            >
+              {TaskItem}
+            </List>
           </div>
         </div>
       </div>
