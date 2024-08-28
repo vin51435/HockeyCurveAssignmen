@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TaskViewAccordion from '../Components/TaskViewAccordion';
 import { Link } from 'react-router-dom';
 import { useAppState, useAppDispatch } from '../Reducers/reducer';
@@ -48,44 +48,130 @@ const TaskPage = () => {
     { name: 'Done', index: 4 }
   ];
 
-  const handleDragStart = (e, index) => {
-    e.dataTransfer.setData('index', index);
-  };
-
-  const handleDrop = (e, dropIndex) => {
-    const dragIndex = e.dataTransfer.getData('index');
-    const updatedTasks = [...filteredTasks];
-    const [draggedItem] = updatedTasks.splice(dragIndex, 1);
-    updatedTasks.splice(dropIndex, 0, draggedItem);
-
-    dispatch({ type: 'state', payload: updatedTasks });
-  };
-  
-  
   const handleAccordionClick = useCallback((id) => () => {
-      setAccordionOpen(prev => (prev === id ? 0 : id));
+    setAccordionOpen(prev => (prev === id ? 0 : id));
   }, []);
 
   const handleAccordionDispatch = (action) => {
     dispatch(action);
   };
+
   const TaskItem = ({ index }) => {
     const task = filteredTasks[index];
+    const itemRef = useRef(null);
+    const dragIndexRef = useRef(null);
+    const [draggingItem, setDraggingItem] = useState(null);
+
+    useEffect(() => {
+      const item = itemRef.current;
+
+      const handleTouchMove = (e) => {
+        e.preventDefault();
+        if (draggingItem) {
+          const touchX = e.touches[0].clientX;
+          const touchY = e.touches[0].clientY;
+  
+          const itemRect = draggingItem.getBoundingClientRect();
+          const itemWidth = itemRect.width;
+          const itemHeight = itemRect.height;
+  
+          draggingItem.style.left = `${touchX - itemWidth / 2}px`;
+          draggingItem.style.top = `${touchY - itemHeight / 2}px`;
+        }
+      };
+
+      item.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+      return () => {
+        item.removeEventListener('touchmove', handleTouchMove);
+      };
+    }, [draggingItem]);
+
+    const handleTouchStart = (e, index) => {
+      setAccordionOpen(0);
+      if(tab!==0) return
+      dragIndexRef.current = index;
+
+      const clone = itemRef.current.cloneNode(true);
+      clone.style.position = 'absolute';
+      clone.style.pointerEvents = 'none';
+      clone.style.left = `${e.touches[0].clientX - itemRef.current.offsetWidth / 2}px`;
+      clone.style.top = `${e.touches[0].clientY - itemRef.current.offsetHeight/2}px`;
+      clone.style.width = `${itemRef.current.offsetWidth}px`; 
+      clone.style.height = `${itemRef.current.offsetHeight}px`;
+      clone.style.opacity = '0.8';
+      document.body.appendChild(clone);
+      setDraggingItem(clone);
+    };
+
+    const handleTouchEnd = (e) => {
+      const draggedItem = dragIndexRef.current;
+
+      const touchEndY = e.changedTouches[0].clientY;
+
+      let dropIndex = index;
+
+      filteredTasks.forEach((_, i) => {
+        const element = document.querySelector(`[data-index='${i}']`);
+        const rect = element.getBoundingClientRect();
+
+        if (touchEndY > rect.top && touchEndY < rect.bottom) {
+          dropIndex = i;
+        }
+      });
+
+      if (draggingItem) {
+        draggingItem.remove();
+        setDraggingItem(null);
+      }
+
+      if (draggedItem !== null && draggedItem !== dropIndex) {
+        updateTaskOrder(draggedItem, dropIndex);
+      }
+
+      dragIndexRef.current = null;
+    };
+
+    const handleDragStart = (e, index) => {
+      setAccordionOpen(0);
+      e.dataTransfer.setData('index', index);
+    };
+
+    const handleDrop = (e, dropIndex) => {
+      const dragIndex = e.dataTransfer.getData('index');
+      updateTaskOrder(dragIndex, dropIndex);
+    };
+
+    const updateTaskOrder = (dragIndex, dropIndex) => {
+      const updatedTasks = [...filteredTasks];
+      const [draggedItem] = updatedTasks.splice(dragIndex, 1);
+      updatedTasks.splice(dropIndex, 0, draggedItem);
+
+      dispatch({ type: 'state', payload: updatedTasks });
+    };
+
     return (
       <div
-        draggable={tab === 0}
-        onDragStart={e => handleDragStart(e, index)}
-        onDragOver={e => e.preventDefault()}
-        onDrop={e => handleDrop(e, index)}
         className="pb-1 bg-zinc-100 dark:bg-zinc-900"
       >
-        <TaskViewAccordion
-          key={task.id}
-          props={task}
-          accordionOpen={accordionOpen}
-          handleAccordionClick={handleAccordionClick(task.id)}
-          handleAccordionDispatch={handleAccordionDispatch}
+        <div
+          ref={itemRef}
+          draggable={tab === 0}
+          data-index={index}
+          onDragStart={(e) => handleDragStart(e, index)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => handleDrop(e, index)}
+          onTouchStart={(e) => handleTouchStart(e, index)}
+          onTouchEnd={handleTouchEnd}
+        >
+          <TaskViewAccordion
+            key={task.id}
+            props={task}
+            accordionOpen={accordionOpen}
+            handleAccordionClick={handleAccordionClick(task.id)}
+            handleAccordionDispatch={handleAccordionDispatch}
           />
+        </div>
       </div>
     );
   };
