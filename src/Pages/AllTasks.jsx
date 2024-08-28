@@ -62,21 +62,14 @@ const TaskPage = () => {
   };
   
   
-  const handleAccordionClick = useCallback((id, ref) => (event) => {
-    if (ref.current && !ref.current.contains(event.target)) {
-      console.log('Clicked outside:', event.target);
-      setAccordionOpen(0);
-    } else {
-      console.log('Clicked inside');
+  const handleAccordionClick = useCallback((id) => () => {
       setAccordionOpen(prev => (prev === id ? 0 : id));
-    }
   }, []);
 
   const handleAccordionDispatch = (action) => {
     dispatch(action);
   };
   const TaskItem = ({ index }) => {
-    const ref = React.createRef()
     const task = filteredTasks[index];
     return (
       <div
@@ -90,9 +83,9 @@ const TaskPage = () => {
           key={task.id}
           props={task}
           accordionOpen={accordionOpen}
-          handleAccordionClick={handleAccordionClick(task.id, ref)}
+          handleAccordionClick={handleAccordionClick(task.id)}
           handleAccordionDispatch={handleAccordionDispatch}
-          ref={ref} />
+          />
       </div>
     );
   };

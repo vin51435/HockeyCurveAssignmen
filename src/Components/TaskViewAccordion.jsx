@@ -1,8 +1,8 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 // eslint-disable-next-line react/display-name
-const TaskViewAccordion = forwardRef(({ props, accordionOpen, handleAccordionDispatch, handleAccordionClick }, ref) => {
+const TaskViewAccordion = ({ props, accordionOpen, handleAccordionDispatch, handleAccordionClick }) => {
   const formatDateTime = (dateString, showTime = true) => {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -27,11 +27,10 @@ const TaskViewAccordion = forwardRef(({ props, accordionOpen, handleAccordionDis
   return (
     <div className="bg-zinc-300 mb-3 dark:bg-zinc-700"
       data-accordionid={props.id}
-      ref={ref}
-      onClick={handleAccordionClick}
     >
       <div
         className="flex items-start justify-between py-2 px-3 w-full h-full cursor-pointer dark:text-gray-400"
+      onClick={handleAccordionClick}
       >
         <div className='flex items-start justify-start w-full font-medium rtl:text-right text-gray-500'>
           <span className='mt-2 text-emerald-800 dark:text-emerald-300'>
@@ -97,6 +96,6 @@ const TaskViewAccordion = forwardRef(({ props, accordionOpen, handleAccordionDis
       </div>
     </div>
   );
-});
+};
 
 export default TaskViewAccordion;

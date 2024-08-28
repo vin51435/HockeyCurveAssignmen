@@ -116,7 +116,7 @@ const AddTask = () => {
                   minDate: "today",
                 }}
                 // value={new Date("Wed Aug 07 2024 15:40:00 GMT+0530 (India Standard Time)")}
-                value={form.dueDate}
+                value={(new Date(form.dueDate) > (new Date())) && form.dueDate}
                 name='dueDate'
                 onChange={(dates) => setForm(prev => ({ ...prev, dueDate: dates[0] }))}
                 className='bg-white dark:bg-gray-900 font-medium focus:outline-none focus-visible:none'
