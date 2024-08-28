@@ -1,28 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useAppDispatch } from '../Reducers/reducer';
+import React, { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 
-const TaskViewAccordion = ({ props }) => {
-  const [isOpen, setIsOpen] = useState(0);
-  const accordionRef = useRef(null);
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (accordionRef.current && !accordionRef.current.contains(event.target)) {
-        setIsOpen(0);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  function formatDateTime(dateString, showTime = true) {
+// eslint-disable-next-line react/display-name
+const TaskViewAccordion = forwardRef(({ props, accordionOpen, handleAccordionDispatch, handleAccordionClick }, ref) => {
+  const formatDateTime = (dateString, showTime = true) => {
     const date = new Date(dateString);
-
     const day = date.getDate();
     const month = date.toLocaleString('en-US', { month: 'short' });
     const year = date.getFullYear();
@@ -40,26 +22,20 @@ const TaskViewAccordion = ({ props }) => {
     }
 
     return formattedDate;
-  }
+  };
 
   return (
     <div className="bg-zinc-300 mb-3 dark:bg-zinc-700"
       data-accordionid={props.id}
-      ref={accordionRef}
+      ref={ref}
+      onClick={handleAccordionClick}
     >
       <div
         className="flex items-start justify-between py-2 px-3 w-full h-full cursor-pointer dark:text-gray-400"
-        onClick={() => setIsOpen(prev => {
-          if (prev === props.id) {
-            return 0;
-          } else {
-            return props.id;
-          };
-        })}
       >
-        <div className=' flex items-start justify-start w-full font-medium rtl:text-right text-gray-500'>
+        <div className='flex items-start justify-start w-full font-medium rtl:text-right text-gray-500'>
           <span className='mt-2 text-emerald-800 dark:text-emerald-300'>
-            <svg className={`w-3 h-3 transition-all ${isOpen ? '' : '-rotate-90'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 490">
+            <svg className={`w-3 h-3 transition-all ${accordionOpen === props.id ? '' : '-rotate-90'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 490">
               <path d="M245 456.701 490 33.299H0z" fill='currentColor' />
             </svg>
           </span>
@@ -84,8 +60,8 @@ const TaskViewAccordion = ({ props }) => {
           </div>
         </div>
       </div>
-      <div className={`overflow-hidden transition-max-height duration-300 ease-in-out ${isOpen === props.id ? 'h-full' : 'max-h-0'}`}>
-        <div className="pt-4  px-8 border-t bg-zinc-100 dark:bg-zinc-900">
+      <div className={`overflow-hidden transition-max-height duration-300 ease-in-out ${accordionOpen === props.id ? 'h-full' : 'max-h-0'}`}>
+        <div className="pt-4 px-8 border-t bg-zinc-100 dark:bg-zinc-900">
           <p className='leading-5'>
             <span className='text-emerald-800 dark:text-emerald-300 font-bold'> Description:</span>
             <br />
@@ -106,14 +82,14 @@ const TaskViewAccordion = ({ props }) => {
                 </Link>
                 <span
                   className='flex-1 py-1 h-full text-center cursor-pointer bg-emerald-800 dark:bg-emerald-700 text-base text-white rounded-3xl'
-                  onClick={() => dispatch({ type: 'snooze', payload: { id: props?.id } })}>
+                  onClick={() => handleAccordionDispatch({ type: 'snooze', payload: { id: props?.id } })}>
                   Snooze
                 </span>
               </>
             }
             <span
               className='flex-1 py-1 h-full text-center cursor-pointer bg-emerald-800 dark:bg-emerald-700 text-base text-white rounded-3xl'
-              onClick={() => dispatch({ type: 'delete', payload: { id: props?.id } })}>
+              onClick={() => handleAccordionDispatch({ type: 'delete', payload: { id: props?.id } })}>
               Delete
             </span>
           </div>
@@ -121,6 +97,6 @@ const TaskViewAccordion = ({ props }) => {
       </div>
     </div>
   );
-};
+});
 
 export default TaskViewAccordion;

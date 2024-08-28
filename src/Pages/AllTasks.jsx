@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import TaskViewAccordion from '../Components/TaskViewAccordion';
 import { Link } from 'react-router-dom';
 import { useAppState, useAppDispatch } from '../Reducers/reducer';
@@ -10,6 +10,7 @@ import { FixedSizeList as List } from 'react-window';
 const TaskPage = () => {
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [accordionOpen, setAccordionOpen] = useState(0);
   const state = useAppState();
   const dispatch = useAppDispatch();
 
@@ -59,8 +60,23 @@ const TaskPage = () => {
 
     dispatch({ type: 'state', payload: updatedTasks });
   };
+  
+  
+  const handleAccordionClick = useCallback((id, ref) => (event) => {
+    if (ref.current && !ref.current.contains(event.target)) {
+      console.log('Clicked outside:', event.target);
+      setAccordionOpen(0);
+    } else {
+      console.log('Clicked inside');
+      setAccordionOpen(prev => (prev === id ? 0 : id));
+    }
+  }, []);
 
+  const handleAccordionDispatch = (action) => {
+    dispatch(action);
+  };
   const TaskItem = ({ index }) => {
+    const ref = React.createRef()
     const task = filteredTasks[index];
     return (
       <div
@@ -70,7 +86,13 @@ const TaskPage = () => {
         onDrop={e => handleDrop(e, index)}
         className="pb-1 bg-zinc-100 dark:bg-zinc-900"
       >
-        <TaskViewAccordion key={task.id} props={task} />
+        <TaskViewAccordion
+          key={task.id}
+          props={task}
+          accordionOpen={accordionOpen}
+          handleAccordionClick={handleAccordionClick(task.id, ref)}
+          handleAccordionDispatch={handleAccordionDispatch}
+          ref={ref} />
       </div>
     );
   };
