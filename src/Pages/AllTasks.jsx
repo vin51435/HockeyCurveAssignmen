@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import TaskViewAccordion from '../Components/TaskViewAccordion';
 import { Link } from 'react-router-dom';
-import { useAppState } from '../Reducers/reducer';
+import { useAppState, useAppDispatch } from '../Reducers/reducer';
 import { ImPlus } from 'react-icons/im';
 import { FaRegFolderOpen } from 'react-icons/fa';
 import DarkModeToggle from '../Components/DarkModeButton';
@@ -11,6 +11,7 @@ const TaskPage = () => {
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const state = useAppState();
+  const dispatch = useAppDispatch();
 
   const filteredTasks = useMemo(() => {
     let tasks = state;
@@ -46,10 +47,29 @@ const TaskPage = () => {
     { name: 'Done', index: 4 }
   ];
 
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData('index', index);
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    const dragIndex = e.dataTransfer.getData('index');
+    const updatedTasks = [...filteredTasks];
+    const [draggedItem] = updatedTasks.splice(dragIndex, 1);
+    updatedTasks.splice(dropIndex, 0, draggedItem);
+
+    dispatch({ type: 'state', payload: updatedTasks });
+  };
+
   const TaskItem = ({ index }) => {
     const task = filteredTasks[index];
     return (
-      <div className=' pb-1 bg-zinc-100 dark:bg-zinc-900'>
+      <div
+        draggable={tab === 0}
+        onDragStart={e => handleDragStart(e, index)}
+        onDragOver={e => e.preventDefault()}
+        onDrop={e => handleDrop(e, index)}
+        className="pb-1 bg-zinc-100 dark:bg-zinc-900"
+      >
         <TaskViewAccordion key={task.id} props={task} />
       </div>
     );
@@ -65,7 +85,7 @@ const TaskPage = () => {
             <span className='pl-2 font-medium'>Task List View</span>
           </span>
         </div>
-        <div className='relative '>
+        <div className='relative'>
           <div className='px-4 pt-4 bg-zinc-300 rounded-t-xl dark:bg-zinc-700'>
             <Link to={'/task'} className='flex justify-center items-center mb-4 px-2 py-1 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
               <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><ImPlus /></span>
@@ -95,9 +115,10 @@ const TaskPage = () => {
           </div>
           <div className='rounded-b-xl bg-zinc-100 dark:bg-zinc-900'>
             <List
-              height={600}  // Adjust based on your layout
+              height={600}
               itemCount={filteredTasks.length}
-              itemSize={100}  // Adjust based on your item height
+              itemSize={100}
+              width={'100%'}
             >
               {TaskItem}
             </List>

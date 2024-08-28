@@ -70,6 +70,9 @@ function reducer(state, action) {
     case 'display':
       console.log(state);
       return state;
+    case 'state': {
+      return action.payload;
+    }
     case 'complete': {
       const updatedState = state.map(task =>
         task.id === action.payload.id ? { ...task, completed: true } : task
