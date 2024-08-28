@@ -6,6 +6,7 @@ import { ImPlus } from 'react-icons/im';
 import { FaRegFolderOpen } from 'react-icons/fa';
 import DarkModeToggle from '../Components/DarkModeButton';
 import { FixedSizeList as List } from 'react-window';
+import { TbAnalyzeFilled } from 'react-icons/tb';
 
 const TaskPage = () => {
   const [tab, setTab] = useState(0);
@@ -178,7 +179,7 @@ const TaskPage = () => {
 
   return (
     <div className='flex flex-col justify-center items-center p-5'>
-      <div className='w-full sm:w-2/4'>
+      <div className='w-full sm:w-2/4 lg:w-2/5'>
         <div className='flex justify-end w-full'><DarkModeToggle /></div>
         <div>
           <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit ml-3 rounded-t-lg'>
@@ -188,10 +189,16 @@ const TaskPage = () => {
         </div>
         <div className='relative'>
           <div className='px-4 pt-4 bg-zinc-300 rounded-t-xl dark:bg-zinc-700'>
-            <Link to={'/task'} className='flex justify-center items-center mb-4 px-2 py-1 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
+           <div className='flex justify-between items-center'>
+           <Link to={'/task'} className='flex justify-center items-center mb-4 px-2 py-1 pr-3 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
               <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><ImPlus /></span>
-              <span className='pl-2 text-xs font-medium'>Add New Task</span>
+              <span className='pl-1 text-xs font-medium'>Add New Task</span>
             </Link>
+           <Link to={'/analytics'} className='flex justify-center items-center mb-4 px-2 py-1 pr-3 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
+              <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><TbAnalyzeFilled /></span>
+              <span className='pl-1 text-xs font-medium'>Analytics</span>
+            </Link>
+           </div>
             <div className='flex justify-evenly items-center gap-1'>
               {tabs.map((ele) => (
                 <span

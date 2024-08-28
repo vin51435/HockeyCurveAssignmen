@@ -14,3 +14,21 @@ body {
   font-family: 'Nunito', sans-serif;
   letter-spacing: 0.04em;
 }
+
+.scroll-container,
+.scroll-container>div,
+#root,
+body {
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.scroll-container::-webkit-scrollbar,
+.scroll-container>div::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  /* Safari and Chrome */
+}

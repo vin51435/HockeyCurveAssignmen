@@ -4,7 +4,7 @@ import Routes from './Routes/Routes';
 function App() {
 
   return (
-    <div className='h-screen'>
+    <div className='h-screen scroll-container'>
      <Routes/>
     </div>
   );

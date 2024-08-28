@@ -3,12 +3,6 @@ import React, { useReducer, useContext, createContext, useEffect } from 'react';
 const StateContext = createContext();
 const DispatchContext = createContext();
 
-function snoozeTask(task) {
-  const newDueDate = new Date(task.dueDate);
-  newDueDate.setDate(newDueDate.getDate() + 1);
-  task.dueDate = newDueDate.toISOString().split('T')[0]; // Format to 'YYYY-MM-DD'
-}
-
 const generateUniqueId = () => Date.now();
 
 const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
@@ -20,7 +14,6 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 1,
     completed: false,
-    snooze: function () { snoozeTask(this); }
   },
   {
     id: 2,
@@ -30,7 +23,6 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 2,
     completed: false,
-    snooze: function () { snoozeTask(this); }
   },
   {
     id: 3,
@@ -40,7 +32,6 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 3,
     completed: false,
-    snooze: function () { snoozeTask(this); }
   },
   {
     id: 4,
@@ -50,7 +41,6 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     priority: 3,
     completed: true,
-    snooze: function () { snoozeTask(this); }
   },
   {
     id: 5,
@@ -60,7 +50,6 @@ const initialTaskState = JSON.parse(localStorage.getItem('tasks')) || [
     dueDate: new Date(new Date().setDate(new Date().getDate() - 1)),
     priority: 1,
     completed: false,
-    snooze: function () { snoozeTask(this); }
   }
 ];
 
@@ -108,7 +97,6 @@ function reducer(state, action) {
         priority: action.payload?.priority && 3,
         createdOn: new Date(),
         completed: false,
-        snooze: snoozeTask // Assuming `snoozeTask` is defined elsewhere
       };
 
       return [...state, newTask];

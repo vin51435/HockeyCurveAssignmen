@@ -65,7 +65,7 @@ const AddTask = () => {
 
   return (
     <div className='flex flex-col justify-center items-center p-5'>
-      <div className='w-full sm:w-2/4'>
+      <div className='w-full sm:w-2/4 lg:w-2/5'>
         <div className='flex justify-end w-full'><DarkModeToggle /></div>
         <div>
           <span className='flex items-center px-2 py-2 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit ml-3 rounded-t-lg'>
