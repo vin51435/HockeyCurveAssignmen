@@ -68,143 +68,115 @@ const TaskPage = () => {
     const touchMoved = useRef(false);
 
     useEffect(() => {
-      const item = itemRef.current;
-
       const handleTouchMove = (e) => {
         if (isLongPress && draggingItem) {
           e.preventDefault();
           const touchX = e.touches[0].clientX;
           const touchY = e.touches[0].clientY;
-
           const itemRect = draggingItem.getBoundingClientRect();
-          const itemWidth = itemRect.width;
-          const itemHeight = itemRect.height;
-
-          draggingItem.style.left = `${touchX - itemWidth / 2}px`;
-          draggingItem.style.top = `${touchY - itemHeight / 2}px`;
+          draggingItem.style.left = `${touchX - itemRect.width / 2}px`;
+          draggingItem.style.top = `${touchY - itemRect.height / 2}px`;
         } else if (!isLongPress) {
-          // Track movement to distinguish between tap and long press
           touchMoved.current = true;
         }
       };
 
+      const item = itemRef.current;
       item.addEventListener('touchmove', handleTouchMove, { passive: false });
-
       return () => {
         item.removeEventListener('touchmove', handleTouchMove);
       };
     }, [isLongPress, draggingItem]);
 
-    const handleTouchStart = (e, index) => {
+    const handleTouchStart = (e) => {
       if (tab !== 0) return;
 
-      startTouchPosition.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-
+      startTouchPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       touchMoved.current = false;
 
       longPressTimeout.current = setTimeout(() => {
-        console.log('handleTouch touchMoved.current', touchMoved.current);
         if (!touchMoved.current) {
           setIsLongPress(true);
           dragIndexRef.current = index;
-
           const clone = itemRef.current.cloneNode(true);
-          clone.style.position = 'absolute';
-          clone.style.pointerEvents = 'none';
-          clone.style.left = `${e.touches[0].clientX - itemRef.current.offsetWidth / 2}px`;
-          clone.style.top = `${e.touches[0].clientY - itemRef.current.offsetHeight / 2}px`;
-          clone.style.width = `${itemRef.current.offsetWidth}px`;
-          clone.style.height = `${itemRef.current.offsetHeight}px`;
-          clone.style.opacity = '0.8';
+          Object.assign(clone.style, {
+            position: 'absolute',
+            pointerEvents: 'none',
+            left: `${e.touches[0].clientX - itemRef.current.offsetWidth / 2}px`,
+            top: `${e.touches[0].clientY - itemRef.current.offsetHeight / 2}px`,
+            width: `${itemRef.current.offsetWidth}px`,
+            height: `${itemRef.current.offsetHeight}px`,
+            opacity: '0.8'
+          });
           document.body.appendChild(clone);
           setDraggingItem(clone);
         }
-      }, 500); // Long press threshold
+      }, 500);
     };
 
     const handleTouchEnd = (e) => {
-      console.log('handleTouchEnd');
       clearTimeout(longPressTimeout.current);
-
       if (isLongPress) {
-        console.log('isLongPress inside handleTouchEnd');
-        const draggedItem = dragIndexRef.current;
         const touchEndY = e.changedTouches[0].clientY;
-
         let dropIndex = index;
-
         filteredTasks.forEach((_, i) => {
           const element = document.querySelector(`[data-index='${i}']`);
-          const rect = element.getBoundingClientRect();
-
-          if (touchEndY > rect.top && touchEndY < rect.bottom) {
-            dropIndex = i;
+          if (element) {
+            const { top, bottom } = element.getBoundingClientRect();
+            if (touchEndY > top && touchEndY < bottom) {
+              dropIndex = i;
+            }
           }
         });
-
         if (draggingItem) {
           draggingItem.remove();
           setDraggingItem(null);
         }
-
-        if (draggedItem !== null && draggedItem !== dropIndex) {
-          updateTaskOrder(draggedItem, dropIndex);
+        if (dragIndexRef.current !== null && dragIndexRef.current !== dropIndex) {
+          updateTaskOrder(dragIndexRef.current, dropIndex);
         }
-
-        dragIndexRef.current = null;
         setIsLongPress(false);
-      } else {
-        console.log('not a long press');
       }
     };
 
     const handleTouchMove = (e) => {
-      // Track movements to cancel long press if necessary
       const moveX = e.touches[0].clientX - startTouchPosition.current.x;
       const moveY = e.touches[0].clientY - startTouchPosition.current.y;
-
       if (Math.abs(moveX) > 10 || Math.abs(moveY) > 10) {
         clearTimeout(longPressTimeout.current);
         touchMoved.current = true;
       }
     };
 
-    const handleDragStart = (e, index) => {
+    const handleDragStart = (e) => {
       e.dataTransfer.setData('index', index);
     };
 
-    const handleDrop = (e, dropIndex) => {
+    const handleDrop = (e) => {
       const dragIndex = e.dataTransfer.getData('index');
-      updateTaskOrder(dragIndex, dropIndex);
+      updateTaskOrder(dragIndex, index);
     };
 
     const updateTaskOrder = (dragIndex, dropIndex) => {
       const updatedTasks = [...filteredTasks];
       const [draggedItem] = updatedTasks.splice(dragIndex, 1);
       updatedTasks.splice(dropIndex, 0, draggedItem);
-
       dispatch({ type: 'state', payload: updatedTasks });
     };
 
     const eventHandlers = {
       draggable: tab === 0,
-      onDragStart: (e) => handleDragStart(e, index),
+      onDragStart: handleDragStart,
       onDragOver: (e) => e.preventDefault(),
-      onDrop: (e) => handleDrop(e, index),
-      onTouchStart: (e) => handleTouchStart(e, index),
+      onDrop: handleDrop,
+      onTouchStart: handleTouchStart,
       onTouchEnd: handleTouchEnd,
       onTouchMove: handleTouchMove,
     };
 
     return (
-      <div className="pb-1 bg-zinc-100 dark:bg-zinc-900"      >
-        <div
-          ref={itemRef}
-          data-index={index}
-        >
+      <div className="pb-1 bg-zinc-100 dark:bg-zinc-900">
+        <div ref={itemRef} data-index={index}>
           <TaskViewAccordion
             key={task.id}
             props={task}
