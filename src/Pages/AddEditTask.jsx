@@ -76,9 +76,9 @@ const AddTask = () => {
         <div className='block p-4 rounded-md bg-zinc-100 dark:bg-zinc-900'>
           <div className='pb-4 flex justify-between items-center text-xl'>
             <span className='font-semibold'>{type === 'add' ? 'Add New Task' : 'Edit Task'}</span>
-            <span
+            {type !== 'add' && <span
               onClick={() => dispatch({ type: 'delete', payload: { id: form?.id } })}
-              className='flex px-8 py-1 h-full bg-rose-600 text-sm font-medium text-white rounded-3xl'>Delete</span>
+              className='flex px-8 py-1 h-full bg-rose-600 text-sm font-medium text-white rounded-3xl'>Delete</span>}
           </div>
           <form className='flex flex-col gap-2' onSubmit={(e) => submitHandler(e)}>
             <input
