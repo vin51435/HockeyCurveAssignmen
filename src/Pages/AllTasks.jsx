@@ -62,22 +62,29 @@ const TaskPage = () => {
     const itemRef = useRef(null);
     const dragIndexRef = useRef(null);
     const [draggingItem, setDraggingItem] = useState(null);
+    const longPressTimeout = useRef(null);
+    const [isLongPress, setIsLongPress] = useState(false);
+    const startTouchPosition = useRef({ x: 0, y: 0 });
+    const touchMoved = useRef(false);
 
     useEffect(() => {
       const item = itemRef.current;
 
       const handleTouchMove = (e) => {
-        e.preventDefault();
-        if (draggingItem) {
+        if (isLongPress && draggingItem) {
+          e.preventDefault();
           const touchX = e.touches[0].clientX;
           const touchY = e.touches[0].clientY;
-  
+
           const itemRect = draggingItem.getBoundingClientRect();
           const itemWidth = itemRect.width;
           const itemHeight = itemRect.height;
-  
+
           draggingItem.style.left = `${touchX - itemWidth / 2}px`;
           draggingItem.style.top = `${touchY - itemHeight / 2}px`;
+        } else if (!isLongPress) {
+          // Track movement to distinguish between tap and long press
+          touchMoved.current = true;
         }
       };
 
@@ -86,55 +93,86 @@ const TaskPage = () => {
       return () => {
         item.removeEventListener('touchmove', handleTouchMove);
       };
-    }, [draggingItem]);
+    }, [isLongPress, draggingItem]);
 
     const handleTouchStart = (e, index) => {
-      setAccordionOpen(0);
-      if(tab!==0) return
-      dragIndexRef.current = index;
+      if (tab !== 0) return;
 
-      const clone = itemRef.current.cloneNode(true);
-      clone.style.position = 'absolute';
-      clone.style.pointerEvents = 'none';
-      clone.style.left = `${e.touches[0].clientX - itemRef.current.offsetWidth / 2}px`;
-      clone.style.top = `${e.touches[0].clientY - itemRef.current.offsetHeight/2}px`;
-      clone.style.width = `${itemRef.current.offsetWidth}px`; 
-      clone.style.height = `${itemRef.current.offsetHeight}px`;
-      clone.style.opacity = '0.8';
-      document.body.appendChild(clone);
-      setDraggingItem(clone);
+      startTouchPosition.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+
+      touchMoved.current = false;
+
+      longPressTimeout.current = setTimeout(() => {
+        console.log('handleTouch touchMoved.current', touchMoved.current);
+        if (!touchMoved.current) {
+          setIsLongPress(true);
+          dragIndexRef.current = index;
+
+          const clone = itemRef.current.cloneNode(true);
+          clone.style.position = 'absolute';
+          clone.style.pointerEvents = 'none';
+          clone.style.left = `${e.touches[0].clientX - itemRef.current.offsetWidth / 2}px`;
+          clone.style.top = `${e.touches[0].clientY - itemRef.current.offsetHeight / 2}px`;
+          clone.style.width = `${itemRef.current.offsetWidth}px`;
+          clone.style.height = `${itemRef.current.offsetHeight}px`;
+          clone.style.opacity = '0.8';
+          document.body.appendChild(clone);
+          setDraggingItem(clone);
+        }
+      }, 500); // Long press threshold
     };
 
     const handleTouchEnd = (e) => {
-      const draggedItem = dragIndexRef.current;
+      console.log('handleTouchEnd');
+      clearTimeout(longPressTimeout.current);
 
-      const touchEndY = e.changedTouches[0].clientY;
+      if (isLongPress) {
+        console.log('isLongPress inside handleTouchEnd');
+        const draggedItem = dragIndexRef.current;
+        const touchEndY = e.changedTouches[0].clientY;
 
-      let dropIndex = index;
+        let dropIndex = index;
 
-      filteredTasks.forEach((_, i) => {
-        const element = document.querySelector(`[data-index='${i}']`);
-        const rect = element.getBoundingClientRect();
+        filteredTasks.forEach((_, i) => {
+          const element = document.querySelector(`[data-index='${i}']`);
+          const rect = element.getBoundingClientRect();
 
-        if (touchEndY > rect.top && touchEndY < rect.bottom) {
-          dropIndex = i;
+          if (touchEndY > rect.top && touchEndY < rect.bottom) {
+            dropIndex = i;
+          }
+        });
+
+        if (draggingItem) {
+          draggingItem.remove();
+          setDraggingItem(null);
         }
-      });
 
-      if (draggingItem) {
-        draggingItem.remove();
-        setDraggingItem(null);
+        if (draggedItem !== null && draggedItem !== dropIndex) {
+          updateTaskOrder(draggedItem, dropIndex);
+        }
+
+        dragIndexRef.current = null;
+        setIsLongPress(false);
+      } else {
+        console.log('not a long press');
       }
+    };
 
-      if (draggedItem !== null && draggedItem !== dropIndex) {
-        updateTaskOrder(draggedItem, dropIndex);
+    const handleTouchMove = (e) => {
+      // Track movements to cancel long press if necessary
+      const moveX = e.touches[0].clientX - startTouchPosition.current.x;
+      const moveY = e.touches[0].clientY - startTouchPosition.current.y;
+
+      if (Math.abs(moveX) > 10 || Math.abs(moveY) > 10) {
+        clearTimeout(longPressTimeout.current);
+        touchMoved.current = true;
       }
-
-      dragIndexRef.current = null;
     };
 
     const handleDragStart = (e, index) => {
-      setAccordionOpen(0);
       e.dataTransfer.setData('index', index);
     };
 
@@ -151,19 +189,21 @@ const TaskPage = () => {
       dispatch({ type: 'state', payload: updatedTasks });
     };
 
+    const eventHandlers = {
+      draggable: tab === 0,
+      onDragStart: (e) => handleDragStart(e, index),
+      onDragOver: (e) => e.preventDefault(),
+      onDrop: (e) => handleDrop(e, index),
+      onTouchStart: (e) => handleTouchStart(e, index),
+      onTouchEnd: handleTouchEnd,
+      onTouchMove: handleTouchMove,
+    };
+
     return (
-      <div
-        className="pb-1 bg-zinc-100 dark:bg-zinc-900"
-      >
+      <div className="pb-1 bg-zinc-100 dark:bg-zinc-900"      >
         <div
           ref={itemRef}
-          draggable={tab === 0}
           data-index={index}
-          onDragStart={(e) => handleDragStart(e, index)}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => handleDrop(e, index)}
-          onTouchStart={(e) => handleTouchStart(e, index)}
-          onTouchEnd={handleTouchEnd}
         >
           <TaskViewAccordion
             key={task.id}
@@ -171,6 +211,7 @@ const TaskPage = () => {
             accordionOpen={accordionOpen}
             handleAccordionClick={handleAccordionClick(task.id)}
             handleAccordionDispatch={handleAccordionDispatch}
+            {...eventHandlers}
           />
         </div>
       </div>
@@ -189,16 +230,16 @@ const TaskPage = () => {
         </div>
         <div className='relative'>
           <div className='px-4 pt-4 bg-zinc-300 rounded-t-xl dark:bg-zinc-700'>
-           <div className='flex justify-between items-center'>
-           <Link to={'/task'} className='flex justify-center items-center mb-4 px-2 py-1 pr-3 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
-              <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><ImPlus /></span>
-              <span className='pl-1 text-xs font-medium'>Add New Task</span>
-            </Link>
-           <Link to={'/analytics'} className='flex justify-center items-center mb-4 px-2 py-1 pr-3 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
-              <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><TbAnalyzeFilled /></span>
-              <span className='pl-1 text-xs font-medium'>Analytics</span>
-            </Link>
-           </div>
+            <div className='flex justify-between items-center'>
+              <Link to={'/task'} className='flex justify-center items-center mb-4 px-2 py-1 pr-3 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
+                <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><ImPlus /></span>
+                <span className='pl-1 text-xs font-medium'>Add New Task</span>
+              </Link>
+              <Link to={'/analytics'} className='flex justify-center items-center mb-4 px-2 py-1 pr-3 text-sm text-white bg-emerald-800 dark:bg-emerald-700 w-fit rounded-3xl'>
+                <span className='text-sm font-bold rounded-3xl bg-white text-black relative p-1 -left-1'><TbAnalyzeFilled /></span>
+                <span className='pl-1 text-xs font-medium'>Analytics</span>
+              </Link>
+            </div>
             <div className='flex justify-evenly items-center gap-1'>
               {tabs.map((ele) => (
                 <span

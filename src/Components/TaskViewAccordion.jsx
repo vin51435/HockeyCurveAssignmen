@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 // eslint-disable-next-line react/display-name
-const TaskViewAccordion = ({ props, accordionOpen, handleAccordionDispatch, handleAccordionClick }) => {
+const TaskViewAccordion = ({ props, accordionOpen, handleAccordionDispatch, handleAccordionClick, ...eventHandlers }) => {
   const formatDateTime = (dateString, showTime = true) => {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -29,8 +29,9 @@ const TaskViewAccordion = ({ props, accordionOpen, handleAccordionDispatch, hand
       data-accordionid={props.id}
     >
       <div
-        className="flex items-start justify-between py-2 px-3 w-full h-full cursor-pointer dark:text-gray-400"
-      onClick={handleAccordionClick}
+        className="draggable flex items-start justify-between py-2 px-3 w-full h-full cursor-pointer dark:text-gray-400"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('accordion click'); handleAccordionClick(); }}
+               {...eventHandlers}
       >
         <div className='flex items-start justify-start w-full font-medium rtl:text-right text-gray-500'>
           <span className='mt-2 text-emerald-800 dark:text-emerald-300'>
@@ -59,7 +60,12 @@ const TaskViewAccordion = ({ props, accordionOpen, handleAccordionDispatch, hand
           </div>
         </div>
       </div>
-      <div className={`overflow-hidden transition-max-height duration-300 ease-in-out ${accordionOpen === props.id ? 'h-full' : 'max-h-0'}`}>
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+        className={`overflow-hidden transition-max-height duration-300 ease-in-out ${accordionOpen === props.id ? 'h-full' : 'max-h-0'}`}>
         <div className="pt-4 px-8 border-t bg-zinc-100 dark:bg-zinc-900">
           <p className='leading-5'>
             <span className='text-emerald-800 dark:text-emerald-300 font-bold'> Description:</span>
