@@ -75,7 +75,7 @@ const TaskPage = () => {
           const touchY = e.touches[0].clientY;
           const itemRect = draggingItem.getBoundingClientRect();
           draggingItem.style.left = `${touchX - itemRect.width / 2}px`;
-          draggingItem.style.top = `${touchY - itemRect.height / 2}px`;
+          draggingItem.style.top = `${touchY - itemRect.height}px`;
         } else if (!isLongPress) {
           touchMoved.current = true;
         }
@@ -103,7 +103,7 @@ const TaskPage = () => {
             position: 'absolute',
             pointerEvents: 'none',
             left: `${e.touches[0].clientX - itemRef.current.offsetWidth / 2}px`,
-            top: `${e.touches[0].clientY - itemRef.current.offsetHeight / 2}px`,
+            top: `${e.touches[0].clientY - itemRef.current.offsetHeight}px`,
             width: `${itemRef.current.offsetWidth}px`,
             height: `${itemRef.current.offsetHeight}px`,
             opacity: '0.8'
