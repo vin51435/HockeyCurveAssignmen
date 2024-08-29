@@ -29,12 +29,12 @@ const TaskViewAccordion = ({ props, accordionOpen, handleAccordionDispatch, hand
       data-accordionid={props.id}
     >
       <div
-        className="draggable flex items-start justify-between py-2 px-3 w-full h-full cursor-pointer dark:text-gray-400"
+        className={`draggable flex items-start justify-between py-2 px-3 w-full h-full cursor-pointer dark:text-gray-400 cursor-grab`}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('accordion click'); handleAccordionClick(); }}
-               {...eventHandlers}
+        {...eventHandlers}
       >
         <div className='flex items-start justify-start w-full font-medium rtl:text-right text-gray-500'>
-          <span className='mt-2 text-emerald-800 dark:text-emerald-300'>
+          <span className='mt-2 text-emerald-800 dark:text-emerald-300 cursor-pointer'>
             <svg className={`w-3 h-3 transition-all ${accordionOpen === props.id ? '' : '-rotate-90'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 490">
               <path d="M245 456.701 490 33.299H0z" fill='currentColor' />
             </svg>
